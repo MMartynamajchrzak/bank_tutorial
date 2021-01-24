@@ -22,12 +22,35 @@ class Bank:
         elif choice == 0:
             self.exit_func()
 
+    def luhn_algorithm(self, bin_num):
+
+        numbers_map = map(int, bin_num)
+        card_num = list(numbers_map)
+
+        new_card_num = []
+
+        for position, num in enumerate(card_num):
+            if (position + 1) % 2 != 0:
+                num *= 2
+            if num > 9:
+                num -= 9
+            new_card_num.append(num)
+
+        check_difference = (sum(new_card_num) % 10)
+
+        if check_difference == 0:
+            checksum = 0
+        else:
+            checksum = 10 - check_difference
+
+        return checksum
+
     def create_account(self):
         user_data = {}
         inn_num = "400000"
 
         ai_num = ''
-        for _ in range(10):
+        for _ in range(9):
             num = random.randint(0, 9)
             ai_num += str(num)
 
@@ -36,12 +59,16 @@ class Bank:
             num = random.randint(0, 9)
             pin += str(num)
 
-        card_number = inn_num + str(ai_num)
+        bin_num = inn_num + str(ai_num)
 
-        user_data[card_number] = pin
+        checksum = self.luhn_algorithm(bin_num)
+
+        updated_card_number = bin_num + str(checksum)
+
+        user_data[updated_card_number] = pin
         print("Your card has been created")
         print("Your card number:")
-        print(int(card_number))
+        print(updated_card_number)
         print("Your card PIN:")
         print(pin)
 
@@ -79,7 +106,7 @@ class Bank:
 
     def log_into_account(self):
         account_number = input("Enter account number:\n")
-        pin_input = input("Enter yout PIN:\n")
+        pin_input = input("Enter your PIN:\n")
         valid_account = False
 
         for account_data in self.accounts:
