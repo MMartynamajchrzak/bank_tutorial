@@ -1,12 +1,12 @@
 # Write your code here
 import random
+import user_dataDB
+
+connection = user_dataDB.connect()
+user_dataDB.create_table(connection)
 
 
 class Bank:
-
-    def __init__(self):
-        self.accounts = []
-        self.balance = 0
 
     def main_menu(self):
         options = {'1.': "Create an account", '2.': "Log into account", '3.': "Exit"}
@@ -22,7 +22,8 @@ class Bank:
         elif choice == 0:
             self.exit_func()
 
-    def luhn_algorithm(self, bin_num):
+    @staticmethod
+    def luhn_algorithm(bin_num):
 
         numbers_map = map(int, bin_num)
         card_num = list(numbers_map)
@@ -72,12 +73,12 @@ class Bank:
         print("Your card PIN:")
         print(pin)
 
-        self.accounts.append(user_data)
+        # storing card_no, pin and balance to database
+        user_dataDB.save_data(connection, updated_card_number, pin)
         self.main_menu()
-        # store the card_no and pin in array in order to persist the data, so that user can log in any time
 
     def balance_func(self):
-        print("Balance: ", self.balance)
+        print("Balance: ", user_dataDB.balance(connection))
         self.logged_menu()
 
     def log_out(self):
@@ -87,8 +88,6 @@ class Bank:
     @staticmethod
     def exit_func():
         print("Bye!")
-
-    # if statement connected with user input --> how will particular no interact with dictionaries key
 
     def logged_menu(self):
         options = {'1.': "Balance", '2.': "Log out", '0.': "Exit"}
@@ -109,10 +108,8 @@ class Bank:
         pin_input = input("Enter your PIN:\n")
         valid_account = False
 
-        for account_data in self.accounts:
-            if account_number in account_data.keys() and pin_input in account_data.values():
-                valid_account = True
-                break
+        if user_dataDB.check_data(connection, account_number, pin_input) > 0:
+            valid_account = True
 
         if valid_account:
             print("You have successfully logged in!")
